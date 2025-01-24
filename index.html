@@ -3,38 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Rabbit</title>
+  <title>Love Foxee Chat</title>
   <link rel="stylesheet" href="style.css">
   <script type="module">
     // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
     import { getDatabase } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
     // Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyAMc7myZqvVBVPRmqd1WGh_EfrsBNzUlbs",
-      authDomain: "chat-rabbit-8eb5f.firebaseapp.com",
-      projectId: "chat-rabbit-8eb5f",
-      storageBucket: "chat-rabbit-8eb5f.firebasestorage.app",
-      messagingSenderId: "932180844290",
-      appId: "1:932180844290:web:ffe5f818e5104f40272c1b",
-      measurementId: "G-WJV8P4LCXV"
+      apiKey: "AIzaSyBgm8A_COxowHNjETWtf61pI5jYEHTnaZc",
+      authDomain: "love-foxee.firebaseapp.com",
+      databaseURL: "https://love-foxee-default-rtdb.firebaseio.com",
+      projectId: "love-foxee",
+      storageBucket: "love-foxee.firebasestorage.app",
+      messagingSenderId: "485043559330",
+      appId: "1:485043559330:web:58bd173b8d43a6ac0eb0fb",
+      measurementId: "G-MG73N1G473"
     };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Expose Firebase instances for the main.js file
+    // Make Firebase instances available globally for the main.js file
     window.firebaseAuth = auth;
     window.firebaseDB = db;
   </script>
 </head>
 <body>
   <div id="chat-container">
-    <h1>Chat Rabbit</h1>
+    <h1>Love Foxee Chat</h1>
     <div id="messages-container">
       <div id="messages"></div>
       <div id="typing-status"></div>
