@@ -8,7 +8,6 @@
   <script type="module">
     // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
     import { getDatabase } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
@@ -25,22 +24,25 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // Make Firebase instances globally available for main.js
+    // Expose Firebase instances for the main.js file
     window.firebaseAuth = auth;
     window.firebaseDB = db;
   </script>
 </head>
 <body>
-  <div id="chat">
-    <h1>Chat Room</h1>
-    <div id="messages"></div>
-    <input type="text" id="message" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
-    <div id="typing-status"></div>
+  <div id="chat-container">
+    <h1>Chat Rabbit</h1>
+    <div id="messages-container">
+      <div id="messages"></div>
+      <div id="typing-status"></div>
+    </div>
+    <div id="input-container">
+      <input type="text" id="message" placeholder="Type your message here..." />
+      <button id="send-button" onclick="sendMessage()">Send</button>
+    </div>
   </div>
   <script type="module" src="main.js"></script>
 </body>
