@@ -1,5 +1,16 @@
-import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-import { ref, push, onChildAdded, set, remove, get, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { 
+  signInAnonymously, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { 
+  ref, 
+  push, 
+  onChildAdded, 
+  set, 
+  remove, 
+  get, 
+  onValue 
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 // Access Firebase instances from the global scope
 const auth = window.firebaseAuth;
@@ -19,27 +30,32 @@ signInAnonymously(auth)
     console.error("Authentication error:", error.message);
   });
 
-// Check if username exists, if not, prompt for it
+// Handle username logic for first-time users
 onAuthStateChanged(auth, (user) => {
   if (user) {
     const userRef = ref(db, `users/${user.uid}`);
     get(userRef).then((snapshot) => {
       if (!snapshot.exists()) {
-        const username = prompt("Enter your username:");
-        set(userRef, { username });
+        // Prompt user to set a username
+        const username = prompt("Enter your username:") || "Anonymous";
+        set(userRef, { username: username.trim() })
+          .then(() => console.log("Username saved successfully!"))
+          .catch((error) => console.error("Error saving username:", error.message));
       }
     });
+  } else {
+    console.error("User authentication failed.");
   }
 });
 
-// Send message function
+// Send a message
 window.sendMessage = function () {
   const messageInput = document.getElementById("message");
   const message = messageInput.value;
 
   if (message.trim() !== "") {
     push(messagesRef, {
-      text: message,
+      text: message.trim(),
       timestamp: Date.now(),
       uid: auth.currentUser.uid,
     })
@@ -48,7 +64,7 @@ window.sendMessage = function () {
         messageInput.value = ""; // Clear input field
       })
       .catch((error) => {
-        console.error("Error sending message:", error);
+        console.error("Error sending message:", error.message);
       });
   } else {
     console.log("Message is empty");
@@ -60,16 +76,17 @@ onChildAdded(messagesRef, (snapshot) => {
   const message = snapshot.val();
   const messagesDiv = document.getElementById("messages");
 
+  // Get the sender's username
   const userRef = ref(db, `users/${message.uid}`);
   get(userRef).then((userSnapshot) => {
     const username = userSnapshot.val()?.username || "Anonymous";
 
+    // Create message element
     const messageDiv = document.createElement("div");
-    messageDiv.id = snapshot.key;
     const date = new Date(message.timestamp);
     messageDiv.textContent = `${username} (${date.toLocaleString()}): ${message.text}`;
 
-    // Add delete button
+    // Add delete button for the message owner
     if (message.uid === auth.currentUser.uid) {
       const deleteButton = document.createElement("button");
       deleteButton.classList.add("delete-btn");
@@ -78,7 +95,7 @@ onChildAdded(messagesRef, (snapshot) => {
         remove(ref(db, `messages/${snapshot.key}`))
           .then(() => {
             console.log("Message deleted successfully");
-            messageDiv.remove();
+            messageDiv.remove(); // Remove message from UI
           })
           .catch((error) => console.error("Error deleting message:", error));
       };
@@ -86,22 +103,24 @@ onChildAdded(messagesRef, (snapshot) => {
     }
 
     messagesDiv.appendChild(messageDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto scroll to the latest message
   });
 });
 
-// Typing indicator
+// Typing indicator functionality
 let typingTimeout;
 document.getElementById("message").addEventListener("input", () => {
   const userTypingRef = ref(db, `typing/${auth.currentUser.uid}`);
   set(userTypingRef, true);
 
+  // Clear typing status after 1 second of inactivity
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
     set(userTypingRef, false);
   }, 1000);
 });
 
+// Show typing indicator
 const typingStatusDiv = document.getElementById("typing-status");
 onValue(typingRef, (snapshot) => {
   const typingStatuses = snapshot.val();
