@@ -1,16 +1,5 @@
-import { 
-  signInAnonymously, 
-  onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
-import { 
-  ref, 
-  push, 
-  onChildAdded, 
-  set, 
-  remove, 
-  get, 
-  onValue 
-} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
+import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+import { ref, push, onChildAdded, set, remove, get, onValue } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js";
 
 // Access Firebase instances from the global scope
 const auth = window.firebaseAuth;
@@ -36,15 +25,12 @@ onAuthStateChanged(auth, (user) => {
     const userRef = ref(db, `users/${user.uid}`);
     get(userRef).then((snapshot) => {
       if (!snapshot.exists()) {
-        // Prompt user to set a username
         const username = prompt("Enter your username:") || "Anonymous";
         set(userRef, { username: username.trim() })
           .then(() => console.log("Username saved successfully!"))
           .catch((error) => console.error("Error saving username:", error.message));
       }
     });
-  } else {
-    console.error("User authentication failed.");
   }
 });
 
@@ -76,12 +62,10 @@ onChildAdded(messagesRef, (snapshot) => {
   const message = snapshot.val();
   const messagesDiv = document.getElementById("messages");
 
-  // Get the sender's username
   const userRef = ref(db, `users/${message.uid}`);
   get(userRef).then((userSnapshot) => {
     const username = userSnapshot.val()?.username || "Anonymous";
 
-    // Create message element
     const messageDiv = document.createElement("div");
     const date = new Date(message.timestamp);
     messageDiv.textContent = `${username} (${date.toLocaleString()}): ${message.text}`;
@@ -95,7 +79,7 @@ onChildAdded(messagesRef, (snapshot) => {
         remove(ref(db, `messages/${snapshot.key}`))
           .then(() => {
             console.log("Message deleted successfully");
-            messageDiv.remove(); // Remove message from UI
+            messageDiv.remove();
           })
           .catch((error) => console.error("Error deleting message:", error));
       };
@@ -103,7 +87,7 @@ onChildAdded(messagesRef, (snapshot) => {
     }
 
     messagesDiv.appendChild(messageDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto scroll to the latest message
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
   });
 });
 
@@ -113,7 +97,6 @@ document.getElementById("message").addEventListener("input", () => {
   const userTypingRef = ref(db, `typing/${auth.currentUser.uid}`);
   set(userTypingRef, true);
 
-  // Clear typing status after 1 second of inactivity
   clearTimeout(typingTimeout);
   typingTimeout = setTimeout(() => {
     set(userTypingRef, false);
